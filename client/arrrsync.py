@@ -1,7 +1,7 @@
 #!/bin/env python3
 import sys
 
-from parser.parser import parser
+from command_parser.parser import parser
 
 
 def clientConsole():
