@@ -7,9 +7,9 @@ def parser(args):
     program = split[0]
     unparsed_args = split[1:]
     if program == 'ls':
-        args = ls_parser.parse_args(unparsed_args)
+        args = vars(ls_parser.parse_args(unparsed_args))
     elif program == 'cd':
-        args = cd_parser.parse_args(unparsed_args)
+        args = vars(cd_parser.parse_args(unparsed_args))
     else:
         args = []
     return (program, args)
