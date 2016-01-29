@@ -5,10 +5,10 @@ import subprocess
 
 from command_parser.parser import parser
 from command_parser.server_parser import server_parser
-from server.helper import printResponse
+from server.helper import printResponse, getTargetDir
 
 def main():
-    args = vars(server_parser.parse_args(sys.argv))
+    arrrsync_args = vars(server_parser.parse_args(sys.argv))
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
     program, args = parser(command)
     if program == 'ls':
@@ -19,7 +19,8 @@ def main():
         if args['l']:
             ls_args.append('-l')
         if args['path']:
-            ls_args.append(args['path'])
+            targetDir = getTargetDir(arrrsync_args['path'], args['path'])
+            ls_args.append(targetDir)
 
         # Creating new subprocess for ls, read the output and print it
         process = subprocess.Popen(ls_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -27,9 +28,14 @@ def main():
         printResponse(stdout, stderr)
 
     elif program == 'cd':
-        process = subprocess.Popen(["cd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, errout = process.communicate()
-        print(stdout, errout)
+        cd_args = ['cd']
+        # Args for cd
+        if args['path']:
+            targetDir = getTargetDir(arrrsync_args['path'], args['path'])
+            cd_args.append(targetDir)
+
+        print(targetDir)
+
     elif program == 'rsync':
         print('rsync stuff')
 
