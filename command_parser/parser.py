@@ -1,5 +1,5 @@
-from cd_parser import cd_parser
-from ls_parser import ls_parser
+from command_parser.cd_parser import cd_parser
+from command_parser.ls_parser import ls_parser
 
 
 def parser(args):
