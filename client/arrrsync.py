@@ -2,32 +2,66 @@
 import os
 import sys
 
-import paramiko
-
 from command_parser.parser import parser
 from command_parser.client_parser import client_parser
+from client.ssh import connectSSH
 
 
 def clientConsole(client):
+    stdin, stdout, stderr = client.exec_command('cd .')
+    current_path = stdout.readline().rstrip('\n')
     running = True
     while running:
-        command = input('>>: ')
+        # Catching user input
+        # CTRL-C jumps to a blank input
+        # CTLR-D exits the program
+        try:
+            command = input('>>: ')
+        except KeyboardInterrupt:
+            print('')
+            continue
+        except EOFError:
+            print('Shutting down.')
+            client.close()
+            sys.exit(1)
+
+        # Parsing input, getting actual command name and arguments
         program, args = parser(command)
         if program == 'ls':
+            # Compile options for ls
             ls_args = ['ls']
-            # Args for ls
             if args['a']:
                 ls_args.append('-a')
             if args['l']:
                 ls_args.append('-l')
-            ls_args.append(args['path'])
+
+            # Get absolute path from current position to target
+            targetPath = os.path.join(current_path, args['path'])
+            ls_args.append(targetPath)
+
+            # Send command to server
             stdin, stdout, stderr = client.exec_command(' '.join(ls_args))
 
+            # Print response
             for line in stdout.readlines():
-                print(line, end='')
+                print(line.rstrip('\n'))
 
         elif program == 'cd':
-            print(program, args)
+            cd_args = ['cd']
+            # Get absolute path from current position to target
+            targetPath = os.path.join(current_path, args['path'])
+
+            cd_args.append(targetPath)
+            stdin, stdout, stderr = client.exec_command(' '.join(cd_args))
+
+            errors = stderr.readline().rstrip('\n')
+            if not len(errors) > 1:
+                # Save current position
+                current_path = stdout.readline().rstrip('\n')
+            else:
+                # Print response
+                print(errors)
+
         elif program == 'exit':
             running = False
 
@@ -38,24 +72,7 @@ def clientConsole(client):
 def main():
     args = vars(client_parser.parse_args())
 
-    # Get keys and set autoadd policy
-    client = paramiko.client.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.get_host_keys()
-
-    # Read config file for later use
-    ssh_config = paramiko.SSHConfig()
-    user_config_file = os.path.expanduser("~/.ssh/config")
-    if os.path.exists(user_config_file):
-        with open(user_config_file) as f:
-            ssh_config.parse(f)
-
-    # Check if there is an entry for the specified hostname
-    config = ssh_config.lookup(args['host'])
-    if config is not None:
-        client.connect(config['hostname'], port=int(config['port']))
-    else:
-        client.connect(args['host'], port=args['port'], username=args['user'])
+    client = connectSSH(args)
 
     try:
         clientConsole(client)
