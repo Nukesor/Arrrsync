@@ -9,7 +9,9 @@ setup(
     keywords='Filetransfer rsync ssh secure restricted',
     url='http://github.com/nukesor/arrrsync',
     license='MIT',
-    install_requires=[],
+    install_requires=[
+        'paramiko>=1.16.0'
+    ],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.3',

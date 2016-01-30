@@ -1,6 +1,6 @@
 import argparse
 
-server_parser = argparse.ArgumentParser(description='Parser for ls')
+server_parser = argparse.ArgumentParser(description='Parser for arrrsync server.')
 
 server_parser.add_argument('command', type=str, help='Can be ignored.')
 server_parser.add_argument('-ro', action='store_true', help='Read only for everything.')

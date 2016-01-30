@@ -7,6 +7,7 @@ from command_parser.parser import parser
 from command_parser.server_parser import server_parser
 from server.helper import printResponse, getTargetDir
 
+
 def main():
     arrrsync_args = vars(server_parser.parse_args(sys.argv))
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
