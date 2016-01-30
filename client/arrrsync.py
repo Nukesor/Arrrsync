@@ -1,13 +1,14 @@
 #!/bin/env python3
 import os
 import sys
+import subprocess
 
 from command_parser.parser import parser
 from command_parser.client_parser import client_parser
 from client.ssh import connectSSH
 
 
-def clientConsole(client):
+def clientConsole(client, rsync):
     stdin, stdout, stderr = client.exec_command('cd .')
     current_path = stdout.readline().rstrip('\n')
     running = True
@@ -62,6 +63,24 @@ def clientConsole(client):
                 # Print response
                 print(errors)
 
+        elif program == 'get':
+            rsync_args = ['rsync']
+            rsync_args.append("-e 'ssh -p {}'".format(rsync[1]))
+            if args['recursive']:
+                rsync_args.append('--recursive')
+            rsync_args.append('--partial')
+            rsync_args.append('--perms')
+            rsync_args.append('--times')
+
+            for path in args['files']:
+                compiled_path = '{}:{}'.format(rsync[0], os.path.join(current_path, path))
+                rsync_args.append(compiled_path)
+
+            rsync_args.append('./')
+
+            rsync_process = subprocess.Popen(' '.join(rsync_args), shell=True)
+            rsync_process.communicate()
+
         elif program == 'exit':
             running = False
 
@@ -70,12 +89,12 @@ def clientConsole(client):
 
 
 def main():
+    # SSH Initialization
     args = vars(client_parser.parse_args())
-
-    client = connectSSH(args)
+    client, rsync = connectSSH(args)
 
     try:
-        clientConsole(client)
+        clientConsole(client, rsync)
     except KeyboardInterrupt:
         print('Keyboard interrupt. Shutting down')
         client.close()

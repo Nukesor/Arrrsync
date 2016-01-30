@@ -18,8 +18,17 @@ def connectSSH(args):
     # Check if there is an entry for the specified hostname
     config = ssh_config.lookup(args['host'])
     if config is not None:
-        client.connect(config['hostname'], port=int(config['port']))
+        if 'user' in config and args['user']:
+            user = config['user']
+        else:
+            user = args['user']
+        client.connect(config['hostname'], port=int(config['port']), username=user)
     else:
         client.connect(args['host'], port=args['port'], username=args['user'])
 
-    return client
+    rsync_hostname = user if user else args['user']
+    rsync_hostname += '@'
+    rsync_hostname += config['hostname'] if 'hostname' in config else args['host']
+    port = config['port'] if 'port' in config else args['port']
+
+    return client, (rsync_hostname, port)

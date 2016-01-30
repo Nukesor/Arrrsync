@@ -1,8 +1,8 @@
 from command_parser.cd_parser import cd_parser
 from command_parser.ls_parser import ls_parser
+from command_parser.get_parser import get_parser
 from command_parser.rsync_parser import rsync_parser
 
-from server.log import log
 
 def parser(args):
     split = args.split(' ')
@@ -12,6 +12,8 @@ def parser(args):
         args = vars(ls_parser.parse_args(unparsed_args))
     elif program == 'cd':
         args = vars(cd_parser.parse_args(unparsed_args))
+    elif program == 'get':
+        args = vars(get_parser.parse_args(unparsed_args))
     elif program == 'rsync':
         for var in unparsed_args:
             # Workaround to remove e. from functions
@@ -22,5 +24,5 @@ def parser(args):
 
         args = vars(rsync_parser.parse_args(unparsed_args))
     else:
-        args = []
+        args = {}
     return (program, args)
