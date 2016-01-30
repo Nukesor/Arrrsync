@@ -19,8 +19,9 @@ def getTargetDir(root, extension):
         if not (relative_path == os.pardir or relative_path.startswith(os.pardir + os.sep)):
             return compiled_path
         else:
-            print("'{}' doesn't exist".format(extension))
+            print("'{}' doesn't exist".format(extension), file=sys.stderr)
+
             sys.exit(0)
     else:
-        print("'{}' doesn't exist".format(extension))
+        print("'{}' doesn't exist".format(extension), file=sys.stderr)
         sys.exit(0)
