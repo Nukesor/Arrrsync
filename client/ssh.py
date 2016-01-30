@@ -1,6 +1,7 @@
 import os
 import paramiko
 
+
 def connectSSH(args):
     # Get keys and set autoadd policy
     client = paramiko.client.SSHClient()
