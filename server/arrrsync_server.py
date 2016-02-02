@@ -13,6 +13,8 @@ def main():
     arrrsync_args = vars(server_parser.parse_args(sys.argv))
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
     program, args = parser(command)
+    if program is None:
+        print('Invalid Command. Supported Programs: \nls \ncd \nrsync')
     if program == 'ls':
         ls_args = ['ls']
         # Args for ls

@@ -5,6 +5,8 @@ from command_parser.rsync_parser import rsync_parser
 
 
 def parser(args):
+    if args is None:
+        return None , None
     split = args.split(' ')
     program = split[0]
     unparsed_args = split[1:]
