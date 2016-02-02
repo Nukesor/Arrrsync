@@ -80,19 +80,28 @@ class Terminal():
             self.lines.append(self.prompt + self.buffer)
             self.history.append(self.buffer)
             self.historyIndex = len(self.history)
-            self.interpreter.interpret(self.buffer)
+            return self.interpreter.interpret(self.buffer)
             self.buffer = ''
 
         # Remove stuff from current buffer
         elif key == 'KEY_BACKSPACE':
             self.buffer = self.buffer[:-1]
 
+        # Tab for completion
+        elif key == '\t':
+            1+1
+
+        # Screen clearing
+        elif key == '\f':
+            1+1
+
         # Trigger redraw for terminal resize
         elif key == 'KEY_RESIZE':
+            self.buffer += key
             self.draw()
 
         # New char to command
-        else:
+        elif not key == 'KEY_RESIZE':
             self.buffer += key
 
         self.draw()

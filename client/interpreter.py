@@ -2,6 +2,7 @@ import os
 import subprocess
 
 from command_parser.parser import parser
+from command_parser.bash_parser import escape
 
 
 class Interpreter():
@@ -26,7 +27,7 @@ class Interpreter():
 
             # Get absolute path from current position to target
             targetPath = os.path.join(self.current_path, args['path'])
-            ls_args.append(targetPath)
+            ls_args.append(escape(targetPath))
 
             # Send command to server
             stdin, stdout, stderr = self.client.exec_command(' '.join(ls_args))
@@ -40,7 +41,7 @@ class Interpreter():
             # Get absolute path from current position to target
             targetPath = os.path.join(self.current_path, args['path'])
 
-            cd_args.append(targetPath)
+            cd_args.append(escape(targetPath))
             stdin, stdout, stderr = self.client.exec_command(' '.join(cd_args))
 
             errors = []
@@ -65,9 +66,14 @@ class Interpreter():
 
             for path in args['files']:
                 compiled_path = '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, path))
-                rsync_args.append(compiled_path)
+                rsync_args.append(escape(compiled_path))
 
             rsync_args.append('./')
 
             rsync_process = subprocess.Popen(' '.join(rsync_args), shell=True)
             rsync_process.communicate()
+
+        elif program == 'exit':
+            return False
+
+        return True
