@@ -12,8 +12,6 @@ def parser(unsplit_args):
     if program == 'ls':
         args = vars(ls_parser.parse_args(unparsed_args))
     elif program == 'cd':
-        if len(unparsed_args) > 1:
-            unparsed_args = [' '.join(unparsed_args)]
         args = vars(cd_parser.parse_args(unparsed_args))
     elif program == 'get':
         args = vars(get_parser.parse_args(unparsed_args))

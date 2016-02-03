@@ -4,6 +4,8 @@ import subprocess
 from command_parser.parser import parser
 from command_parser.bash_parser import escape
 
+from server.log import log
+
 
 class Interpreter():
     def __init__(self, client, rsync, terminal):
@@ -26,8 +28,8 @@ class Interpreter():
                 ls_args.append('-l')
 
             # Get absolute path from current position to target
-            targetPath = os.path.join(self.current_path, args['path'])
-            ls_args.append(escape(targetPath))
+            targetPath = os.path.join(escape(self.current_path), args['path'][0])
+            ls_args.append(targetPath)
 
             # Send command to server
             stdin, stdout, stderr = self.client.exec_command(' '.join(ls_args))
@@ -39,9 +41,9 @@ class Interpreter():
         elif program == 'cd':
             cd_args = ['cd']
             # Get absolute path from current position to target
-            targetPath = os.path.join(self.current_path, args['path'])
+            targetPath = os.path.join(escape(self.current_path), args['path'][0])
 
-            cd_args.append(escape(targetPath))
+            cd_args.append(targetPath)
             stdin, stdout, stderr = self.client.exec_command(' '.join(cd_args))
 
             errors = []
@@ -65,8 +67,8 @@ class Interpreter():
             rsync_args.append('--times')
 
             for path in args['files']:
-                compiled_path = '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, path))
-                rsync_args.append(escape(compiled_path))
+                compiled_path = '{}:{}'.format(self.rsync[0], os.path.join(escape(self.current_path), path))
+                rsync_args.append(compiled_path)
 
             rsync_args.append('./')
 
