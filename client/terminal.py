@@ -2,6 +2,10 @@ import curses
 
 from client.interpreter import Interpreter
 
+from server.log import log
+from command_parser.bash_parser import escape, unescape
+from command_parser.parser import parser
+
 
 class Terminal():
     def __init__(self, client, rsync):
@@ -14,9 +18,18 @@ class Terminal():
 
         self.get_dimensions()
 
+        self.lines = []
+        self.displayedLines = 0
+
         self.history = []
         self.historyIndex = 0
-        self.lines = []
+
+        self.completionList = []
+        self.completionIndex = 0
+        self.completionBuffer = None
+        self.completionActive = False
+        self.toBeCompleted = ''
+
         self.buffer = ''
         self.prompt = '>>: '
 
@@ -90,7 +103,11 @@ class Terminal():
 
         # Tab for completion
         elif key == '\t':
-            1+1
+            self.prepare_completion()
+            if len(self.completionList) > 0:
+                lastBuffer = self.completionBuffer
+                lastBuffer = lastBuffer.replace(self.toBeCompleted, self.completionList[self.completionIndex])
+                self.buffer = escape(lastBuffer)
 
         # Screen clearing
         elif key == '\f':
@@ -99,21 +116,24 @@ class Terminal():
         # Trigger redraw for terminal resize
         elif key == 'KEY_RESIZE':
             self.buffer += key
+            self.get_dimensions()
             self.draw()
 
         # New char to command
         elif not key == 'KEY_RESIZE':
+            self.completionActive = False
             self.buffer += key
 
         self.draw()
-
         return True
 
     def add_lines(self, lines):
         self.lines += lines
+        self.displayedLines += len(lines)
 
     def add_line(self, line):
         self.lines.append(line)
+        self.displayedLines += 1
 
     def restore_terminal(self):
         curses.nocbreak()
@@ -124,3 +144,21 @@ class Terminal():
     def get_dimensions(self):
         self.colums = curses.COLS
         self.rows = curses.LINES
+
+    def prepare_completion(self):
+        program, args = parser(self.buffer)
+        if 'path' in args:
+            self.completionList = self.interpreter.get_completion()
+            if not self.completionActive:
+                self.completionIndex = 0
+                self.completionBuffer = unescape(self.buffer)
+                self.toBeCompleted = unescape(args['path'])
+
+            self.completionList = list(filter(lambda string: string.startswith(self.toBeCompleted), self.completionList))
+
+            if self.completionActive:
+                self.completionIndex += 1
+                if self.completionIndex >= len(self.completionList):
+                    self.completionIndex = 0
+
+        self.completionActive = True

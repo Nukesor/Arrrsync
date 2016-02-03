@@ -4,8 +4,6 @@ import subprocess
 from command_parser.parser import parser
 from command_parser.bash_parser import escape
 
-from server.log import log
-
 
 class Interpreter():
     def __init__(self, client, rsync, terminal):
@@ -15,6 +13,14 @@ class Interpreter():
 
         stdin, stdout, stderr = client.exec_command('cd .')
         self.current_path = stdout.readline().rstrip('\n')
+
+    def get_completion(self):
+        stdin, stdout, stderr = self.client.exec_command('ls')
+        # Print response
+        completion = []
+        for line in stdout.readlines():
+            completion.append(line.rstrip('\n'))
+        return completion
 
     def interpret(self, command):
         # Parsing input, getting actual command name and arguments
