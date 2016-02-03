@@ -3,10 +3,11 @@ import os
 import sys
 import subprocess
 
-from command_parser.parser import parser
-from command_parser.server_parser import server_parser
 from server.helper import printResponse, getTargetDir
-from server.log import log
+
+from command_parser.parser import parser
+from command_parser.bash_parser import unescape
+from command_parser.server_parser import server_parser
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
         if args['l']:
             ls_args.append('-l')
         if args['path']:
-            targetDir = getTargetDir(arrrsync_args['path'], args['path'])
+            targetDir = getTargetDir(arrrsync_args['path'], unescape(args['path']))
             ls_args.append(targetDir)
 
         # Creating new subprocess for ls, read the output and print it
@@ -32,7 +33,7 @@ def main():
     elif program == 'cd':
         # Args for cd
         if args['path']:
-            targetDir = getTargetDir(arrrsync_args['path'], args['path'])
+            targetDir = getTargetDir(arrrsync_args['path'], unescape(args['path']))
             if os.path.isdir(targetDir):
                 print(targetDir)
             else:
@@ -68,7 +69,7 @@ def main():
 
         for path in args['files']:
             if not path == '.':
-                path = getTargetDir(arrrsync_args['path'], path)
+                path = getTargetDir(arrrsync_args['path'], unescape(path))
             rsync_args.append(path)
 
         rsync_process = subprocess.Popen(rsync_args, shell=False)

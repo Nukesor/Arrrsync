@@ -29,8 +29,7 @@ def unescape(string):
     return string
 
 
-def reassemble_command(command_list):
+def argsplit(command_list):
     splitted = re.split(r"((?<!\\)\s)", command_list)
     fixed = filter(lambda a: a != ' ', splitted)
-
     return list(fixed)

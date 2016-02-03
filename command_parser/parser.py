@@ -2,14 +2,13 @@ from command_parser.cd_parser import cd_parser
 from command_parser.ls_parser import ls_parser
 from command_parser.get_parser import get_parser
 from command_parser.rsync_parser import rsync_parser
-from command_parser.bash_parser import reassemble_command
+from command_parser.bash_parser import argsplit
 
 
-def parser(args):
-    split = args.split(' ')
+def parser(unsplit_args):
+    split = argsplit(unsplit_args)
     program = split[0]
-    broken_args = split[1:]
-    unparsed_args = reassemble_command(broken_args)
+    unparsed_args = split[1:]
     if program == 'ls':
         args = vars(ls_parser.parse_args(unparsed_args))
     elif program == 'cd':
