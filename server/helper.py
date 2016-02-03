@@ -1,14 +1,16 @@
 import os
 import sys
 
+
 def printResponse(stdout, stderr):
     stdout = stdout.decode('UTF-8')
-    stderr  = stderr.decode('UTF-8')
+    stderr = stderr.decode('UTF-8')
 
     if stdout:
         print(stdout, end='')
     if stderr:
         print(stderr, end='')
+
 
 def getTargetDir(root, extension):
     root = os.path.realpath(root)

@@ -80,7 +80,8 @@ class Terminal():
             self.lines.append(self.prompt + self.buffer)
             self.history.append(self.buffer)
             self.historyIndex = len(self.history)
-            return self.interpreter.interpret(self.buffer)
+            if not self.interpreter.interpret(self.buffer):
+                return False
             self.buffer = ''
 
         # Remove stuff from current buffer
