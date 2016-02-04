@@ -3,6 +3,8 @@ import subprocess
 
 from command_parser.parser import parser
 from command_parser.bash_parser import escape
+from command_parser.cd_parser import cd_reassemble
+from command_parser.ls_parser import ls_reassemble
 
 
 class Interpreter():
@@ -16,6 +18,7 @@ class Interpreter():
 
     def get_completion(self):
         stdin, stdout, stderr = self.client.exec_command('ls')
+
         # Print response
         completion = []
         for line in stdout.readlines():
@@ -26,31 +29,23 @@ class Interpreter():
         # Parsing input, getting actual command name and arguments
         program, args = parser(command)
         if program == 'ls':
-            # Compile options for ls
-            ls_args = ['ls']
-            if args['a']:
-                ls_args.append('-a')
-            if args['l']:
-                ls_args.append('-l')
-
-            # Get absolute path from current position to target
+            # Compute path
             targetPath = os.path.join(escape(self.current_path), args['path'][0])
-            ls_args.append(targetPath)
-
+            args['path'] = [targetPath]
             # Send command to server
-            stdin, stdout, stderr = self.client.exec_command(' '.join(ls_args))
+            stdin, stdout, stderr = self.client.exec_command(ls_reassemble(args))
 
             # Print response
             for line in stdout.readlines():
                 self.terminal.add_line(line.rstrip('\n'))
 
         elif program == 'cd':
-            cd_args = ['cd']
-            # Get absolute path from current position to target
+            # Compute path
             targetPath = os.path.join(escape(self.current_path), args['path'][0])
+            args['path'] = [targetPath]
 
-            cd_args.append(targetPath)
-            stdin, stdout, stderr = self.client.exec_command(' '.join(cd_args))
+            # Send command to server
+            stdin, stdout, stderr = self.client.exec_command(cd_reassemble(args))
 
             errors = []
             for line in stderr.readlines():

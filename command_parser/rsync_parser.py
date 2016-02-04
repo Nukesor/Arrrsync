@@ -1,5 +1,4 @@
 import argparse
-import getpass
 
 rsync_parser = argparse.ArgumentParser(description='Parser for arrrsync rsync.')
 

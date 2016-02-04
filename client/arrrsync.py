@@ -21,4 +21,5 @@ def main():
             terminal.restore_terminal()
             raise
 
+    terminal.restore_terminal()
     sys.exit(0)
