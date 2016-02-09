@@ -12,6 +12,7 @@ from command_parser.server_parser import server_parser
 
 
 def main():
+    log('called')
     arrrsync_args = vars(server_parser.parse_args(sys.argv))
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
     program, args = parser(command)
@@ -24,6 +25,8 @@ def main():
             ls_args.append('-a')
         if args['l']:
             ls_args.append('-l')
+        if args['h']:
+            ls_args.append('-h')
         if args['path']:
             for item in args['path']:
                 targetDir = getTargetDir(arrrsync_args['path'], unescape(item))
@@ -37,7 +40,6 @@ def main():
     elif program == 'cd':
         # Args for cd
         if args['path']:
-            log(str(args['path']))
             target = args['path'][0]
             targetDir = getTargetDir(arrrsync_args['path'], unescape(target))
             if os.path.isdir(targetDir):
