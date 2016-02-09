@@ -78,5 +78,9 @@ class Interpreter():
 
         elif program == 'exit':
             return False
+        else:
+            self.terminal.add_line('Invalid Command. Valid Commands are:')
+            self.terminal.add_line('ls [path], cd [path], get [-r] [path], exit')
+
 
         return True

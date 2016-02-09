@@ -42,14 +42,15 @@ class Terminal():
         row = 0
         self.screen.clear()
         topbuffer = 1
+        bottombuffer = 2
         leftbuffer = 1
         lineCount = len(self.lines)
-        if lineCount < self.rows - 5:
+        if lineCount < self.rows - bottombuffer:
             for line in self.lines:
                 self.screen.addstr(row + topbuffer, leftbuffer, line)
                 row += 1
         else:
-            for index in range(lineCount-self.rows+5, lineCount-1):
+            for index in range(lineCount-self.rows+bottombuffer, lineCount):
                 self.screen.addstr(row + topbuffer, leftbuffer, self.lines[index])
                 row += 1
 
