@@ -4,6 +4,7 @@ import sys
 import subprocess
 
 from server.helper import printResponse, getTargetDir
+from server.log import log
 
 from command_parser.parser import parser
 from command_parser.bash_parser import unescape
@@ -24,8 +25,9 @@ def main():
         if args['l']:
             ls_args.append('-l')
         if args['path']:
-            targetDir = getTargetDir(arrrsync_args['path'], unescape(args['path']))
-            ls_args.append(targetDir)
+            for item in args['path']:
+                targetDir = getTargetDir(arrrsync_args['path'], unescape(item))
+                ls_args.append(targetDir)
 
         # Creating new subprocess for ls, read the output and print it
         process = subprocess.Popen(ls_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -35,7 +37,9 @@ def main():
     elif program == 'cd':
         # Args for cd
         if args['path']:
-            targetDir = getTargetDir(arrrsync_args['path'], unescape(args['path']))
+            log(str(args['path']))
+            target = args['path'][0]
+            targetDir = getTargetDir(arrrsync_args['path'], unescape(target))
             if os.path.isdir(targetDir):
                 print(targetDir)
             else:
