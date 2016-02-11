@@ -6,9 +6,9 @@ import subprocess
 from server.helper import printResponse, getTargetDir
 from server.log import log
 
-from command_parser.parser import parser
-from command_parser.bash_parser import unescape
-from command_parser.server_parser import server_parser
+from commands.parser import parser
+from commands.bash_parser import unescape
+from commands.server_parser import server_parser
 
 
 def main():
@@ -75,7 +75,7 @@ def main():
         rsync_args.append('--links')
         rsync_args.append('--rsh=.')
 
-        for path in args['files']:
+        for path in args['path']:
             if not path == '.':
                 path = getTargetDir(arrrsync_args['path'], unescape(path))
             rsync_args.append(path)

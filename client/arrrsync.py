@@ -3,7 +3,7 @@ import sys
 
 from client.ssh import connectSSH
 from client.terminal import Terminal
-from command_parser.client_parser import client_parser
+from commands.client_parser import client_parser
 
 
 def main():

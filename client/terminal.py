@@ -3,8 +3,9 @@ import curses
 from client.interpreter import Interpreter
 
 from server.log import log
-from command_parser.bash_parser import escape, unescape
-from command_parser.parser import parser
+from commands.bash_parser import escape, unescape
+from commands.parser import parser
+from commands.assemble import assemble
 
 
 class Terminal():
@@ -64,6 +65,7 @@ class Terminal():
             self.lines.append(self.prompt + self.buffer)
             self.buffer = ''
             self.draw()
+            self.completionActive = False
             return True
         except:
             return True
@@ -91,6 +93,7 @@ class Terminal():
 
         # Newline returns command
         elif key == '\n':
+            self.completionActive = False
             self.lines.append(self.prompt + self.buffer)
             self.history.append(self.buffer)
             self.historyIndex = len(self.history)
@@ -100,15 +103,12 @@ class Terminal():
 
         # Remove stuff from current buffer
         elif key == 'KEY_BACKSPACE':
+            self.completionActive = False
             self.buffer = self.buffer[:-1]
 
         # Tab for completion
         elif key == '\t':
-            self.prepare_completion()
-            if len(self.completionList) > 0:
-                lastBuffer = self.completionBuffer
-                lastBuffer = lastBuffer.replace(self.toBeCompleted, self.completionList[self.completionIndex])
-                self.buffer = escape(lastBuffer)
+            self.complete()
 
         # Screen clearing
         elif key == '\f':
@@ -146,14 +146,14 @@ class Terminal():
         self.colums = curses.COLS
         self.rows = curses.LINES
 
-    def prepare_completion(self):
+    def complete(self):
         program, args = parser(self.buffer)
         if 'path' in args:
-            self.completionList = self.interpreter.get_completion()
             if not self.completionActive:
+                self.completionList = self.interpreter.get_completion()
                 self.completionIndex = 0
-                self.completionBuffer = unescape(self.buffer)
-                self.toBeCompleted = unescape(args['path'])
+                self.completionBuffer = self.buffer
+                self.toBeCompleted = unescape(args['path'])[-1]
 
             self.completionList = list(filter(lambda string: string.startswith(self.toBeCompleted), self.completionList))
 
@@ -161,5 +161,11 @@ class Terminal():
                 self.completionIndex += 1
                 if self.completionIndex >= len(self.completionList):
                     self.completionIndex = 0
+
+            if len(self.completionList) > 0:
+                program, args = parser(self.completionBuffer)
+                if 'path' in args:
+                    args['path'][-1] = escape(self.completionList[self.completionIndex])
+                    self.buffer = assemble(program, args)
 
         self.completionActive = True

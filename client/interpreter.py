@@ -1,10 +1,10 @@
 import os
 import subprocess
 
-from command_parser.parser import parser
-from command_parser.bash_parser import escape
-from command_parser.cd_parser import cd_reassemble
-from command_parser.ls_parser import ls_reassemble
+from commands.parser import parser
+from commands.bash_parser import escape
+from commands.cd_parser import cd_reassemble
+from commands.ls_parser import ls_reassemble
 
 
 class Interpreter():
@@ -14,10 +14,10 @@ class Interpreter():
         self.terminal = terminal
 
         stdin, stdout, stderr = client.exec_command('cd .')
-        self.current_path = stdout.readline().rstrip('\n')
+        self.current_path = escape(stdout.readline().rstrip('\n'))
 
     def get_completion(self):
-        stdin, stdout, stderr = self.client.exec_command('ls')
+        stdin, stdout, stderr = self.client.exec_command('ls {}'.format(self.current_path))
 
         # Print response
         completion = []
@@ -29,9 +29,8 @@ class Interpreter():
         # Parsing input, getting actual command name and arguments
         program, args = parser(command)
         if program == 'ls':
-            # Compute path
-            targetPath = os.path.join(escape(self.current_path), args['path'][0])
-            args['path'] = [targetPath]
+            compiled_paths = map(lambda path: os.path.join(self.current_path, path), args['path'])
+            args['path'] = list(compiled_paths)
             # Send command to server
             stdin, stdout, stderr = self.client.exec_command(ls_reassemble(args))
 
@@ -41,7 +40,7 @@ class Interpreter():
 
         elif program == 'cd':
             # Compute path
-            targetPath = os.path.join(escape(self.current_path), args['path'][0])
+            targetPath = os.path.join(self.current_path, args['path'][0])
             args['path'] = [targetPath]
 
             # Send command to server
@@ -53,7 +52,7 @@ class Interpreter():
 
             if not len(errors) > 1:
                 # Save current position
-                self.current_path = stdout.readline().rstrip('\n')
+                self.current_path = escape(stdout.readline().rstrip('\n'))
             else:
                 # Print response
                 self.terminal.add_lines(errors)
@@ -67,9 +66,8 @@ class Interpreter():
             rsync_args.append('--perms')
             rsync_args.append('--times')
 
-            for path in args['files']:
-                compiled_path = '{}:{}'.format(self.rsync[0], os.path.join(escape(self.current_path), path))
-                rsync_args.append(compiled_path)
+            compiled_paths = map(lambda path: '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, path)), args['path'])
+            rsync_args += list(compiled_paths)
 
             rsync_args.append('./')
 
@@ -81,6 +79,5 @@ class Interpreter():
         else:
             self.terminal.add_line('Invalid Command. Valid Commands are:')
             self.terminal.add_line('ls [path], cd [path], get [-r] [path], exit')
-
 
         return True

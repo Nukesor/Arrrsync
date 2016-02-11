@@ -17,4 +17,4 @@ rsync_parser.add_argument('--partial', action='store_true', help='')
 rsync_parser.add_argument('--server', action='store_true', help='')
 rsync_parser.add_argument('--sender', action='store_true', help='')
 
-rsync_parser.add_argument('files', nargs='*', type=str, help='The different directories we want to copy arround')
+rsync_parser.add_argument('path', nargs='*', type=str, help='The different directories we want to copy arround')

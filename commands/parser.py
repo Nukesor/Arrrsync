@@ -1,8 +1,8 @@
-from command_parser.cd_parser import cd_parser
-from command_parser.ls_parser import ls_parser
-from command_parser.get_parser import get_parser
-from command_parser.rsync_parser import rsync_parser
-from command_parser.bash_parser import argsplit
+from commands.cd_parser import cd_parser
+from commands.ls_parser import ls_parser
+from commands.get_parser import get_parser
+from commands.rsync_parser import rsync_parser
+from commands.bash_parser import argsplit
 
 
 def parser(unsplit_args):

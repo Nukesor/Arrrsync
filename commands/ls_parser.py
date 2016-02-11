@@ -17,8 +17,8 @@ def ls_reassemble(args):
         ls_args.append('-l')
     if args['h']:
         ls_args.append('-h')
+    if 'path' in args:
+        ls_args += args['path']
 
-    # Get absolute path from current position to target
-    ls_args.append(args['path'][0])
     command = ' '.join(ls_args)
     return command
