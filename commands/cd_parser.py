@@ -1,7 +1,6 @@
-import argparse
+from commands.Throwing_Parser import ThrowingParser
 
-cd_parser = argparse.ArgumentParser(description='Parser for ls')
-
+cd_parser = ThrowingParser(description='Parser for ls', add_help=False)
 cd_parser.add_argument('path', nargs='*', default=['.'], type=str, help='A directory you want to cd into.')
 
 

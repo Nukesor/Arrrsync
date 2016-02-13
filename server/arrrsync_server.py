@@ -4,7 +4,6 @@ import sys
 import subprocess
 
 from server.helper import printResponse, getTargetDir
-from server.log import log
 
 from commands.parser import parser
 from commands.bash_parser import unescape
@@ -12,10 +11,9 @@ from commands.server_parser import server_parser
 
 
 def main():
-    log('called')
     arrrsync_args = vars(server_parser.parse_args(sys.argv))
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
-    program, args = parser(command)
+    program, args, unkown = parser(command)
     if program is None:
         print('Invalid Command. Supported Programs: \nls \ncd \nrsync')
     if program == 'ls':

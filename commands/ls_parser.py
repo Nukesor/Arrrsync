@@ -1,6 +1,7 @@
-import argparse
+from commands.Throwing_Parser import ThrowingParser
 
-ls_parser = argparse.ArgumentParser(description='Parser for ls', add_help=False)
+
+ls_parser = ThrowingParser(description='Parser for ls', add_help=False)
 
 ls_parser.add_argument('-l', action='store_true', help='Detailed list view for ls.')
 ls_parser.add_argument('-a', action='store_true', help='Show all files. Including hidden files.')

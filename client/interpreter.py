@@ -1,10 +1,11 @@
 import os
 import subprocess
 
-from commands.parser import parser
+from commands.parser import parser, format_parse_error
 from commands.bash_parser import escape
 from commands.cd_parser import cd_reassemble
 from commands.ls_parser import ls_reassemble
+from commands.Throwing_Parser import ArgumentParserError
 
 
 class Interpreter():
@@ -27,7 +28,12 @@ class Interpreter():
 
     def interpret(self, command):
         # Parsing input, getting actual command name and arguments
-        program, args = parser(command)
+        try:
+            program, args = parser(command)
+        except ArgumentParserError as error:
+            self.terminal.add_lines(format_parse_error(error, command))
+            return True
+
         if program == 'ls':
             compiled_paths = map(lambda path: os.path.join(self.current_path, path), args['path'])
             args['path'] = list(compiled_paths)

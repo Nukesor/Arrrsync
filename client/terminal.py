@@ -2,7 +2,6 @@ import curses
 
 from client.interpreter import Interpreter
 
-from server.log import log
 from commands.bash_parser import escape, unescape
 from commands.parser import parser
 from commands.assemble import assemble
