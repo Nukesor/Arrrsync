@@ -1,5 +1,5 @@
-import sys
 import os
+
 
 def log(log):
     path = os.path.expanduser('~/logfile')

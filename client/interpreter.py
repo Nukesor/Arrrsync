@@ -1,11 +1,10 @@
 import os
 import subprocess
 
+from commands.bash_formatter import escape
 from commands.parser import parser, format_parse_error
-from commands.bash_parser import escape
-from commands.cd_parser import cd_reassemble
-from commands.ls_parser import ls_reassemble
-from commands.Throwing_Parser import ArgumentParserError
+from commands.assemble import cd_reassemble, ls_reassemble
+from commands.ThrowingParser import ArgumentParserError
 
 
 class Interpreter():

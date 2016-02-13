@@ -2,7 +2,7 @@ import os
 import sys
 
 
-def printResponse(stdout, stderr):
+def print_response(stdout, stderr):
     stdout = stdout.decode('UTF-8')
     stderr = stderr.decode('UTF-8')
 
@@ -12,7 +12,7 @@ def printResponse(stdout, stderr):
         print(stderr, end='')
 
 
-def getTargetDir(root, extension):
+def get_target_dir(root, extension):
     root = os.path.realpath(root)
     compiled_path = os.path.join(root, extension)
     compiled_path = os.path.realpath(compiled_path)

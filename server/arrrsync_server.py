@@ -3,10 +3,10 @@ import os
 import sys
 import subprocess
 
-from server.helper import printResponse, getTargetDir
+from server.helper import print_response, get_target_dir
 
 from commands.parser import parser
-from commands.bash_parser import unescape
+from commands.bash_formatter import unescape
 from commands.server_parser import server_parser
 
 
@@ -27,19 +27,19 @@ def main():
             ls_args.append('-h')
         if args['path']:
             for item in args['path']:
-                targetDir = getTargetDir(arrrsync_args['path'], unescape(item))
+                targetDir = get_target_dir(arrrsync_args['path'], unescape(item))
                 ls_args.append(targetDir)
 
         # Creating new subprocess for ls, read the output and print it
         process = subprocess.Popen(ls_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        printResponse(stdout, stderr)
+        print_response(stdout, stderr)
 
     elif program == 'cd':
         # Args for cd
         if args['path']:
             target = args['path'][0]
-            targetDir = getTargetDir(arrrsync_args['path'], unescape(target))
+            targetDir = get_target_dir(arrrsync_args['path'], unescape(target))
             if os.path.isdir(targetDir):
                 print(targetDir)
             else:
@@ -75,7 +75,7 @@ def main():
 
         for path in args['path']:
             if not path == '.':
-                path = getTargetDir(arrrsync_args['path'], unescape(path))
+                path = get_target_dir(arrrsync_args['path'], unescape(path))
             rsync_args.append(path)
 
         rsync_process = subprocess.Popen(rsync_args, shell=False)
