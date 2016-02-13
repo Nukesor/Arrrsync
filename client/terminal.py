@@ -1,3 +1,4 @@
+import math
 import curses
 
 from client.interpreter import Interpreter
@@ -20,6 +21,7 @@ class Terminal():
 
         self.lines = []
         self.displayedLines = 0
+        self.viewport = 0
 
         self.history = []
         self.historyIndex = 0
@@ -39,22 +41,40 @@ class Terminal():
         self.draw()
 
     def draw(self):
+        # Runner for lines
         row = 0
-        self.screen.clear()
+        start = 0
+        end = 0
+        # Get the amount of already added lines in history
+        lineCount = len(self.lines)
+
+        # Buffer variables
         topbuffer = 1
         bottombuffer = 2
         leftbuffer = 1
-        lineCount = len(self.lines)
-        if lineCount < self.rows - bottombuffer:
-            for line in self.lines:
-                self.screen.addstr(row + topbuffer, leftbuffer, line)
-                row += 1
-        else:
-            for index in range(lineCount-self.rows+bottombuffer, lineCount):
-                self.screen.addstr(row + topbuffer, leftbuffer, self.lines[index])
-                row += 1
 
-        self.screen.addstr(row + topbuffer, leftbuffer, self.prompt + self.buffer)
+        # Screen clearing for redrawing
+        self.screen.clear()
+
+        # Calculate end and start indices of self.lines for drawing
+        if lineCount < self.rows - bottombuffer:
+            start = 0
+            end = lineCount
+        elif self.viewport != 0:
+            if self.viewport > (lineCount - self.rows + bottombuffer):
+                self.viewport = (lineCount - self.rows + bottombuffer)
+            elif self.viewport < 0:
+                self.viewport = 0
+            start = lineCount - self.rows + bottombuffer - self.viewport
+            end = lineCount - self.viewport
+
+        # Draw the lines in specified range
+        for index in range(start, end):
+            self.screen.addstr(row + topbuffer, leftbuffer, self.lines[index])
+            row += 1
+
+        # Drawing of the current buffer ( userinput )
+        self.screen.addstr(self.rows-1, leftbuffer, self.prompt + self.buffer)
 
     def update(self):
         try:
@@ -109,6 +129,14 @@ class Terminal():
         elif key == '\t':
             self.complete()
 
+        # Scroll history down
+        elif key == 'KEY_PPAGE':
+            self.viewport += math.floor(self.rows/2)
+
+        # Scroll history up
+        elif key == 'KEY_NPAGE':
+            self.viewport -= math.floor(self.rows/2)
+
         # Screen clearing
         elif key == '\f':
             1+1
@@ -120,9 +148,10 @@ class Terminal():
             self.draw()
 
         # New char to command
-        elif not key == 'KEY_RESIZE':
+        else:
             self.completionActive = False
             self.buffer += key
+            self.viewport = 0
 
         self.draw()
         return True
