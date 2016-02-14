@@ -60,13 +60,14 @@ class Terminal():
         if lineCount < self.rows - bottombuffer:
             start = 0
             end = lineCount
-        elif self.viewport != 0:
+        else:
             if self.viewport > (lineCount - self.rows + bottombuffer):
                 self.viewport = (lineCount - self.rows + bottombuffer)
             elif self.viewport < 0:
                 self.viewport = 0
             start = lineCount - self.rows + bottombuffer - self.viewport
             end = lineCount - self.viewport
+
 
         # Draw the lines in specified range
         for index in range(start, end):
@@ -119,6 +120,7 @@ class Terminal():
             if not self.interpreter.interpret(self.buffer):
                 return False
             self.buffer = ''
+            self.viewport = 0
 
         # Remove stuff from current buffer
         elif key == 'KEY_BACKSPACE':
@@ -139,7 +141,8 @@ class Terminal():
 
         # Screen clearing
         elif key == '\f':
-            1+1
+            self.lines = []
+            self.viewport = 0
 
         # Trigger redraw for terminal resize
         elif key == 'KEY_RESIZE':
@@ -151,7 +154,6 @@ class Terminal():
         else:
             self.completionActive = False
             self.buffer += key
-            self.viewport = 0
 
         self.draw()
         return True
