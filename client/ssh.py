@@ -1,4 +1,5 @@
 import os
+import getpass
 import paramiko
 
 
@@ -15,20 +16,34 @@ def connectSSH(args):
         with open(user_config_file) as f:
             ssh_config.parse(f)
 
-    # Check if there is an entry for the specified hostname
-    config = ssh_config.lookup(args['host'])
-    if config is not None:
-        if 'user' in config and args['user']:
-            user = config['user']
-        else:
-            user = args['user']
-        client.connect(config['hostname'], port=int(config['port']), username=user)
-    else:
-        client.connect(args['host'], port=args['port'], username=args['user'])
+    # Create default config
+    default_config = {}
+    default_config['user'] = getpass.getuser()
+    default_config['port'] = 22
+    default_config['identityfile'] = '~/.ssh/id_rsa'
 
-    rsync_hostname = user if user else args['user']
+    # Get commandline config
+    pruned_args = {k: v for k, v in args.items() if v is not None}
+
+    # Check if there is an entry for the specified hostname
+    # Get ssh config from ~/.ssh/config
+    config_file = ssh_config.lookup(args['hostname'])
+
+    if config_file is not None:
+        config = default_config
+        config.update(config_file)
+        config.update(pruned_args)
+        if 'hostname' in config_file:
+            config['hostname'] = config_file['hostname']
+    else:
+        config = default_config.update(pruned_args)
+
+    config['port'] = int(config['port'])
+
+    client.connect(config['hostname'], port=config['port'], username=config['user'])
+
+    rsync_hostname = config['user']
     rsync_hostname += '@'
     rsync_hostname += config['hostname'] if 'hostname' in config else args['host']
-    port = config['port'] if 'port' in config else args['port']
 
-    return client, (rsync_hostname, port)
+    return client, (rsync_hostname, config['port'])

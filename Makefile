@@ -15,3 +15,6 @@ dist:
 
 upload: clean dist
 	twine upload dist/*
+
+register: clean dist
+	twine register dist/*

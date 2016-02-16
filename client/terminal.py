@@ -92,6 +92,7 @@ class Terminal():
 
         # Key up or left to up the history
         if key == 'KEY_UP' or key == 'KEY_LEFT':
+            self.completionActive = False
             self.historyIndex -= 1
             if self.historyIndex < 0:
                 self.historyIndex = 0
@@ -100,6 +101,7 @@ class Terminal():
 
         # Key down or right to go down the history
         elif key == 'KEY_DOWN' or key == 'KEY_RIGHT':
+            self.completionActive = False
             self.historyIndex += 1
             if self.historyIndex > len(self.history) - 1:
                 self.historyIndex = len(self.history)
@@ -114,7 +116,7 @@ class Terminal():
         # Newline returns command
         elif key == '\n':
             self.completionActive = False
-            self.lines.append(self.prompt + self.buffer)
+            self.add_line(self.prompt + self.buffer)
             self.history.append(self.buffer)
             self.historyIndex = len(self.history)
             if not self.interpreter.interpret(self.buffer):

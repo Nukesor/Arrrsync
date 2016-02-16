@@ -24,3 +24,6 @@ Let's take a closer look at the command: `/usr/bin/arrrsync-server -ro /srv/file
 
 The `arrrsync` client emulates an shell, but it's actually nothing else than an convenient way of exploring the remote directory with autocompletion and history.  
 The client supports `ls`, `cd`, `get` and `push`. `get` and `push` are aliases for rsync with some specific flags for file transfer.
+
+The client uses paramiko for establishing a ssh session and tries to use as much configuration from your `~/.ssh/config` as possible.
+The files downloaded with `get` will be stored in the directory you called `arrrsync`.
