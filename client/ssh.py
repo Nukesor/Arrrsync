@@ -1,6 +1,8 @@
 import os
+import sys
 import getpass
 import paramiko
+from paramiko.ssh_exception import PasswordRequiredException, BadAuthenticationType
 
 
 def connectSSH(args):
@@ -11,7 +13,7 @@ def connectSSH(args):
 
     # Read config file for later use
     ssh_config = paramiko.SSHConfig()
-    user_config_file = os.path.expanduser("~/.ssh/config")
+    user_config_file = os.path.expanduser('~/.ssh/config')
     if os.path.exists(user_config_file):
         with open(user_config_file) as f:
             ssh_config.parse(f)
@@ -20,7 +22,7 @@ def connectSSH(args):
     default_config = {}
     default_config['user'] = getpass.getuser()
     default_config['port'] = 22
-    default_config['identityfile'] = '~/.ssh/id_rsa'
+    default_config['identityfile'] = [os.path.expanduser('~/.ssh/id_rsa')]
 
     # Get commandline config
     pruned_args = {k: v for k, v in args.items() if v is not None}
@@ -40,7 +42,42 @@ def connectSSH(args):
 
     config['port'] = int(config['port'])
 
-    client.connect(config['hostname'], port=config['port'], username=config['user'])
+    not_connected = True
+    first_try = True
+    while not_connected:
+        try:
+            if 'password' in config:
+                client.connect(
+                    config['hostname'],
+                    port=config['port'],
+                    username=config['user'],
+                    key_filename=config['identityfile'],
+                    password=config['password']
+                )
+            else:
+                client.connect(
+                    config['hostname'],
+                    port=config['port'],
+                    username=config['user'],
+                    key_filename=config['identityfile']
+                )
+            not_connected = False
+
+        except PasswordRequiredException:
+            if first_try:
+                print("No ssh-agent running or can't find a key in your ssh-agent.")
+                print('Using keyfile: ' + config['identityfile'][0])
+                print('If you want to connect using password authentication, enter your password here as well.')
+                first_try = False
+            try:
+                config['password'] = getpass.getpass('Password: ')
+            except KeyboardInterrupt:
+                print('\nKeyboardInterrupt detected. Exiting')
+                sys.exit(1)
+
+        except BadAuthenticationType as error:
+            print("Wrong password or wrong authentication type. Allowed types are : {}".format(str(error.allowed_types)))
+            del config['password']
 
     rsync_hostname = config['user']
     rsync_hostname += '@'
