@@ -71,7 +71,7 @@ def connectSSH(args):
                 first_try = False
             try:
                 config['password'] = getpass.getpass('Password: ')
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
                 print('\nKeyboardInterrupt detected. Exiting')
                 sys.exit(1)
 
