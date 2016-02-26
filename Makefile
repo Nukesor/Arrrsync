@@ -5,6 +5,9 @@ default: dev-install
 dev-install:
 	sudo python setup.py develop
 
+install:
+	sudo python setup.py install
+
 clean:
 	sudo rm -rf dist
 	sudo rm -rf build

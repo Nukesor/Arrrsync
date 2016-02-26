@@ -13,7 +13,7 @@ from commands.server_parser import server_parser
 def main():
     arrrsync_args = vars(server_parser.parse_args(sys.argv))
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
-    program, args, unkown = parser(command)
+    program, args = parser(command)
     if program is None:
         print('Invalid Command. Supported Programs: \nls \ncd \nrsync')
     if program == 'ls':
@@ -71,7 +71,7 @@ def main():
 
         # Don't allow users to copy symlinked directories.
         rsync_args.append('--links')
-        rsync_args.append('--rsh=.')
+        rsync_args.append('--info=progress2')
 
         for path in args['path']:
             if not path == '.':
