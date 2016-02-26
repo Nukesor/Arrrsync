@@ -71,7 +71,6 @@ def main():
 
         # Don't allow users to copy symlinked directories.
         rsync_args.append('--links')
-        rsync_args.append('--rsh=.')
 
         for path in args['path']:
             if not path == '.':
