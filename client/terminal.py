@@ -68,7 +68,6 @@ class Terminal():
             start = lineCount - self.rows + bottombuffer - self.viewport
             end = lineCount - self.viewport
 
-
         # Draw the lines in specified range
         for index in range(start, end):
             self.screen.addstr(row + topbuffer, leftbuffer, self.lines[index])
@@ -116,11 +115,15 @@ class Terminal():
         # Newline returns command
         elif key == '\n':
             self.completionActive = False
-            self.add_line(self.prompt + self.buffer)
-            self.history.append(self.buffer)
-            self.historyIndex = len(self.history)
+            # Call interpreter on current buffer
             if not self.interpreter.interpret(self.buffer):
                 return False
+            # Add command to draw buffer
+            self.add_line(self.prompt + self.buffer)
+            # Append command to history and reset historyIndex
+            self.history.append(self.buffer)
+            self.historyIndex = len(self.history)
+            # Clear buffer and reset viewport
             self.buffer = ''
             self.viewport = 0
 
@@ -201,3 +204,9 @@ class Terminal():
                     self.buffer = assemble(program, args)
 
         self.completionActive = True
+
+    def update_last_lines(self, lines):
+        for index, line in enumerate(lines):
+            new_index = len(self.lines)-1-len(lines)+index
+            self.lines[new_index] = line
+        self.draw()
