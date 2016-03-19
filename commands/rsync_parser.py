@@ -9,6 +9,7 @@ rsync_parser.add_argument('-i', '--ignore-times', action='store_true', help='')
 rsync_parser.add_argument('-s', '--protect-args', action='store_true', help='')
 rsync_parser.add_argument('-f', '--filter', action='store_true', help='')
 rsync_parser.add_argument('-x', '--one-file-system', action='store_true', help='')
+rsync_parser.add_argument('-l', '--links', action='store_true', help='')
 
 rsync_parser.add_argument('-L', '--copy-links', action='store_true', help='')
 rsync_parser.add_argument('-C', '--cvs-exclude', action='store_true', help='')

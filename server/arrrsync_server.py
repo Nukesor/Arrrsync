@@ -4,6 +4,7 @@ import sys
 import subprocess
 
 from server.helper import print_response, get_target_dir
+from server.log import log
 
 from commands.parser import parser
 from commands.bash_formatter import unescape
@@ -50,8 +51,6 @@ def main():
         rsync_args = ['rsync']
         if args['server']:
             rsync_args.append('--server')
-        if args['sender']:
-            rsync_args.append('--sender')
 
         if args['recursive']:
             rsync_args.append('--recursive')
@@ -73,11 +72,29 @@ def main():
         rsync_args.append('--links')
         rsync_args.append('--info=progress2')
 
-        for path in args['path']:
+        # Sender flag is set. This means the server will send some data
+        if args['sender']:
+            if arrrsync_args['r'] is not True:
+                print("Reading is not for your key allowed. Aborting")
+                sys.exit(0)
+
+            rsync_args.append('--sender')
+            for path in args['path']:
+                if not path == '.':
+                    path = get_target_dir(arrrsync_args['path'], unescape(path))
+                rsync_args.append(path)
+        # Sender flag isn't set. This means the server will receive some data
+        else:
+            if arrrsync_args['w'] is not True:
+                print("Writing is not for your key allowed. Aborting")
+                sys.exit(0)
+            path = args['path'][-1]
             if not path == '.':
                 path = get_target_dir(arrrsync_args['path'], unescape(path))
             rsync_args.append(path)
 
+
+        log(str(rsync_args))
         rsync_process = subprocess.Popen(rsync_args, shell=False)
         rsync_process.communicate()
 

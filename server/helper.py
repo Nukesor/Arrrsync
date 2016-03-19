@@ -22,7 +22,6 @@ def get_target_dir(root, extension):
             return compiled_path
         else:
             print("'{}' doesn't exist".format(extension), file=sys.stderr)
-
             sys.exit(0)
     else:
         print("'{}' doesn't exist".format(extension), file=sys.stderr)

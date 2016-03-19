@@ -14,11 +14,11 @@ It should look like this afterwards:
 
 `command` is an ssh functionality which allows us to pipe the ssh command directly to another program, without opening a shell.  
 
-Let's take a closer look at the command: `/usr/bin/arrrsync-server -ro /srv/files/`
+Let's take a closer look at the command: `/usr/bin/arrrsync-server -r -w /srv/files/`
 
 `arrrsync-server` This is the program that interprets all incoming commands and only executes those, that are allowed.  
 `/srv/files/` specifies the directory the user is allowed to see. He will be able to explore everything beneath it, but he can't escape it.  
-`-ro` A normal read-only/write-only flag. By default there is read and write allowed.  
+`-rw` A normal read/write flag. By default there is only directory exploration allowed.  
 
 ## The client
 
