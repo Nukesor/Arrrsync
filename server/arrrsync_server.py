@@ -16,7 +16,7 @@ def main():
     command = os.environ.get('SSH_ORIGINAL_COMMAND')
     program, args = parser(command)
     if program is None:
-        print('Invalid Command. Supported Programs: \nls \ncd \nrsync')
+        print('Invalid Command. Supported Programs: \nls \ncd \nisdir \nrsync')
     if program == 'ls':
         ls_args = ['ls']
         # Args for ls
@@ -45,6 +45,17 @@ def main():
                 print(targetDir)
             else:
                 print("'{}' is not a directory".format(args['path']), file=sys.stderr)
+
+    elif program == 'isdir':
+        # Args for cd
+        if args['path']:
+            target = args['path'][0]
+            targetDir = get_target_dir(arrrsync_args['path'], unescape(target))
+            if os.path.isdir(targetDir):
+                print('True')
+            else:
+                print('False')
+        print("False")
 
     elif program == 'rsync':
         # Compile rsync arguments
@@ -94,7 +105,6 @@ def main():
             rsync_args.append(path)
 
 
-        log(str(rsync_args))
         rsync_process = subprocess.Popen(rsync_args, shell=False)
         rsync_process.communicate()
 

@@ -1,4 +1,4 @@
-from commands.terminal_parser import cd_parser, ls_parser, get_parser, push_parser
+from commands.terminal_parser import cd_parser, ls_parser, get_parser, push_parser, isdir_parser
 from commands.rsync_parser import rsync_parser
 from commands.bash_formatter import argsplit
 
@@ -9,6 +9,8 @@ def parser(unsplit_args):
     unparsed_args = split[1:]
     if program == 'ls':
         args = vars(ls_parser.parse_args(unparsed_args))
+    elif program == 'isdir':
+        args = vars(isdir_parser.parse_args(unparsed_args))
     elif program == 'cd':
         args = vars(cd_parser.parse_args(unparsed_args))
     elif program == 'get':

@@ -5,7 +5,6 @@ import sys
 def print_response(stdout, stderr):
     stdout = stdout.decode('UTF-8')
     stderr = stderr.decode('UTF-8')
-
     if stdout:
         print(stdout, end='')
     if stderr:
