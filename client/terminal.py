@@ -17,15 +17,15 @@ class Terminal():
         self.get_dimensions()
 
         self.lines = []
-        self.displayedLines = 0
+        self.displayed_lines = 0
         self.viewport = 0
 
         self.history = []
-        self.historyIndex = 0
+        self.history_index = 0
 
         self.buffer = ''
         self.prompt = '>>: '
-        self.completionActive = False
+        self.completion_active = False
 
         self.client = client
         self.rsync = rsync
@@ -77,29 +77,29 @@ class Terminal():
             self.lines.append(self.prompt + self.buffer)
             self.buffer = ''
             self.draw()
-            self.completionActive = False
+            self.completion_active = False
             return True
         except:
             return True
 
         # Key up or left to up the history
         if key == 'KEY_UP' or key == 'KEY_LEFT':
-            self.completionActive = False
-            self.historyIndex -= 1
-            if self.historyIndex < 0:
-                self.historyIndex = 0
-            if self.historyIndex <= len(self.history)-1:
-                self.buffer = str(self.history[self.historyIndex])
+            self.completion_active = False
+            self.history_index -= 1
+            if self.history_index < 0:
+                self.history_index = 0
+            if self.history_index <= len(self.history)-1:
+                self.buffer = str(self.history[self.history_index])
 
         # Key down or right to go down the history
         elif key == 'KEY_DOWN' or key == 'KEY_RIGHT':
-            self.completionActive = False
-            self.historyIndex += 1
-            if self.historyIndex > len(self.history) - 1:
-                self.historyIndex = len(self.history)
+            self.completion_active = False
+            self.history_index += 1
+            if self.history_index > len(self.history) - 1:
+                self.history_index = len(self.history)
                 self.buffer = ''
-            elif self.history[self.historyIndex]:
-                self.buffer = str(self.history[self.historyIndex])
+            elif self.history[self.history_index]:
+                self.buffer = str(self.history[self.history_index])
 
         # CTLR-D exits the program
         elif key == '^D':
@@ -107,7 +107,7 @@ class Terminal():
 
         # Newline returns command
         elif key == '\n':
-            self.completionActive = False
+            self.completion_active = False
             try:
                 # Call interpreter on current buffer
                 if not self.interpreter.interpret(self.buffer):
@@ -118,26 +118,26 @@ class Terminal():
                 pass
             # Add command to draw buffer
             self.add_line(self.prompt + self.buffer)
-            # Append command to history and reset historyIndex
+            # Append command to history and reset history_index
             self.history.append(self.buffer)
-            self.historyIndex = len(self.history)
+            self.history_index = len(self.history)
             # Clear buffer and reset viewport
             self.buffer = ''
             self.viewport = 0
 
         # Remove stuff from current buffer
         elif key == 'KEY_BACKSPACE':
-            self.completionActive = False
+            self.completion_active = False
             self.buffer = self.buffer[:-1]
 
         # Tab for completion
         elif key == '\t':
             try:
-                if not self.completionActive:
+                if not self.completion_active:
                     self.buffer = self.completer.complete(self.buffer)
                 else:
                     self.buffer = self.completer.next()
-                self.completionActive = True
+                self.completion_active = True
             except KeyboardInterrupt:
                 pass
 
@@ -162,7 +162,7 @@ class Terminal():
 
         # New char to command
         else:
-            self.completionActive = False
+            self.completion_active = False
             self.buffer += key
 
         self.draw()
@@ -170,11 +170,11 @@ class Terminal():
 
     def add_lines(self, lines):
         self.lines += lines
-        self.displayedLines += len(lines)
+        self.displayed_lines += len(lines)
 
     def add_line(self, line):
         self.lines.append(line)
-        self.displayedLines += 1
+        self.displayed_lines += 1
 
     def restore_terminal(self):
         curses.nocbreak()

@@ -5,16 +5,14 @@ from commands.bash_formatter import escape, unescape
 from commands.assemble import assemble
 
 
-
 class Completer():
     def __init__(self, client, terminal):
         self.client = client
         self.terminal = terminal
 
-        self.completionList = []
-        self.completionIndex = 0
-        self.completionBuffer = None
-        self.toBeCompleted = ''
+        self.completion_list = []
+        self.completion_index = 0
+        self.completion_buffer = None
         self.completionPath = ''
 
         stdin, stdout, stderr = client.exec_command('cd .')
@@ -76,39 +74,39 @@ class Completer():
         """ Actual function called by the terminal. Creates a list of possible completions and returns the first element """
         program, args = parser(buffer)
         if 'path' in args:
-            self.completionIndex = 0
+            self.completion_index = 0
             # Save buffer for later completions
-            self.completionBuffer = buffer
+            self.completion_buffer = buffer
 
             # Local completion
             if 'target' in args and args['target'] != '.':
-                self.toBeCompleted = args['target']
-                self.completionList = self.get_local_completion_list(args['target'])
+                to_be_completed = args['target']
+                self.completion_list = self.get_local_completion_list(to_be_completed)
             # Remote completion
             else:
-                self.toBeCompleted = unescape(args['path'])[-1]
-                self.completionList = self.get_remote_completion_list(self.toBeCompleted)
+                to_be_completed = unescape(args['path'])[-1]
+                self.completion_list = self.get_remote_completion_list(to_be_completed)
 
             # Filtering completion options to match given string
-            self.completionList = list(filter(lambda string: string.startswith(self.toBeCompleted), self.completionList))
+            self.completion_list = list(filter(lambda string: string.startswith(to_be_completed), self.completion_list))
 
         return self.next()
 
     def next(self):
         """ Returns the next completion suggestion """
-        if len(self.completionList) > 0:
-            program, args = parser(self.completionBuffer)
+        if len(self.completion_list) > 0:
+            program, args = parser(self.completion_buffer)
             if 'target' in args and args['target'] != '.':
-                args['target'] = escape(self.completionPath + self.completionList[self.completionIndex])
+                args['target'] = escape(self.completionPath + self.completion_list[self.completion_index])
             else:
-                args['path'][-1] = escape(self.completionList[self.completionIndex])
+                args['path'][-1] = escape(self.completion_list[self.completion_index])
             buffer = assemble(program, args)
         else:
-            buffer = self.completionBuffer
+            buffer = self.completion_buffer
 
         # Increment completion index
-        self.completionIndex += 1
-        if self.completionIndex >= len(self.completionList):
-            self.completionIndex = 0
+        self.completion_index += 1
+        if self.completion_index >= len(self.completion_list):
+            self.completion_index = 0
 
         return buffer
