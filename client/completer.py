@@ -18,6 +18,13 @@ class Completer():
         stdin, stdout, stderr = client.exec_command('cd .')
         self.remote_directory_root = escape(stdout.readline().rstrip('\n'))
 
+    def check_if_dir(self, path):
+        stdin, stdout, stderr = self.client.exec_command('isdir {}'.format(path))
+        response = escape(stdout.readline().rstrip('\n'))
+        if response == 'True':
+            return True
+        return False
+
     def get_remote_completion_list(self, relative_path):
         """ Get the completion for a relative path on the remote machine """
 
@@ -33,8 +40,10 @@ class Completer():
         path = os.path.normpath(path)
 
         # The path is a file, but we need a directory for completion
-        if not path.endswith('/'):
+        if not self.check_if_dir(path):
             path = os.path.dirname(path)
+        else:
+            path = path + '/'
 
         stdin, stdout, stderr = self.client.exec_command('ls {}'.format(escape(path)))
 
@@ -54,8 +63,10 @@ class Completer():
         # Normalize path
         if relative_path.startswith('~'):
             path = os.path.expanduser(relative_path)
-        elif relative_path.startswith('.'):
+        elif relative_path.startswith('.') or relative_path == '':
             path = os.path.join(os.getcwd(), relative_path)
+        else:
+            path = path
         path = os.path.normpath(path)
         path = os.path.realpath(path)
 
