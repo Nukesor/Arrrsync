@@ -1,12 +1,12 @@
 def assemble(program, args):
     if program == 'ls':
-        command = ls_reassemble(args)
+        command = ls_assemble(args)
     elif program == 'cd':
-        command = cd_reassemble(args)
+        command = cd_assemble(args)
     elif program == 'get':
-        command = get_reassemble(args)
+        command = get_assemble(args)
     elif program == 'push':
-        command = push_reassemble(args)
+        command = push_assemble(args)
     elif program == 'rsync':
         command = command = 'rsync'
     else:
@@ -15,7 +15,7 @@ def assemble(program, args):
     return command
 
 
-def get_reassemble(args):
+def get_assemble(args):
     # Compile options for get
     get_args = ['get']
     if 'path' in args:
@@ -28,7 +28,7 @@ def get_reassemble(args):
     return command
 
 
-def push_reassemble(args):
+def push_assemble(args):
     # Compile options for get
     get_args = ['push']
     if 'path' in args:
@@ -41,7 +41,7 @@ def push_reassemble(args):
     return command
 
 
-def ls_reassemble(args):
+def ls_assemble(args):
     # Compile options for ls
     ls_args = ['ls']
     if args['a']:
@@ -57,7 +57,7 @@ def ls_reassemble(args):
     return command
 
 
-def cd_reassemble(args):
+def cd_assemble(args):
     cd_args = ['cd']
     cd_args.append(args['path'][0])
     command = ' '.join(cd_args)

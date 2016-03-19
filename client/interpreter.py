@@ -5,7 +5,7 @@ from client.helper import rsync_error_check
 
 from commands.bash_formatter import escape
 from commands.parser import parser, format_parse_error
-from commands.assemble import cd_reassemble, ls_reassemble
+from commands.assemble import cd_assemble, ls_assemble
 from commands.ThrowingParser import ArgumentParserError
 
 
@@ -30,7 +30,7 @@ class Interpreter():
             compiled_paths = map(lambda path: os.path.join(self.current_path, path), args['path'])
             args['path'] = list(compiled_paths)
             # Send command to server
-            stdin, stdout, stderr = self.client.exec_command(ls_reassemble(args))
+            stdin, stdout, stderr = self.client.exec_command(ls_assemble(args))
 
             # Print response
             for line in stdout.readlines():
@@ -42,7 +42,7 @@ class Interpreter():
             args['path'] = [targetPath]
 
             # Send command to server
-            stdin, stdout, stderr = self.client.exec_command(cd_reassemble(args))
+            stdin, stdout, stderr = self.client.exec_command(cd_assemble(args))
 
             errors = []
             for line in stderr.readlines():
