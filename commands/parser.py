@@ -1,4 +1,4 @@
-from commands.terminal_parser import cd_parser, ls_parser, get_parser
+from commands.terminal_parser import cd_parser, ls_parser, get_parser, push_parser
 from commands.rsync_parser import rsync_parser
 from commands.bash_formatter import argsplit
 
@@ -13,6 +13,8 @@ def parser(unsplit_args):
         args = vars(cd_parser.parse_args(unparsed_args))
     elif program == 'get':
         args = vars(get_parser.parse_args(unparsed_args))
+    elif program == 'push':
+        args = vars(push_parser.parse_args(unparsed_args))
     elif program == 'rsync':
         for var in unparsed_args:
             # Workaround to remove e. from functions

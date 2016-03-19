@@ -5,6 +5,8 @@ def assemble(program, args):
         command = cd_reassemble(args)
     elif program == 'get':
         command = get_reassemble(args)
+    elif program == 'push':
+        command = push_reassemble(args)
     elif program == 'rsync':
         command = command = 'rsync'
     else:
@@ -16,10 +18,24 @@ def assemble(program, args):
 def get_reassemble(args):
     # Compile options for get
     get_args = ['get']
-    if args['recursive']:
-        get_args.append('-r')
     if 'path' in args:
         get_args += args['path']
+    if 'target' in args and args['target'] != '.':
+        get_args.append('--target')
+        get_args.append(args['target'])
+
+    command = ' '.join(get_args)
+    return command
+
+
+def push_reassemble(args):
+    # Compile options for get
+    get_args = ['push']
+    if 'path' in args:
+        get_args += args['path']
+    if 'target' in args and args['target'] != '.':
+        get_args.append('--target')
+        get_args.append(args['target'])
 
     command = ' '.join(get_args)
     return command

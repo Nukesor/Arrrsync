@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+from client.helper import rsync_error_check
+
 from commands.bash_formatter import escape
 from commands.parser import parser, format_parse_error
 from commands.assemble import cd_reassemble, ls_reassemble
@@ -19,11 +21,22 @@ class Interpreter():
     def get_completion(self):
         stdin, stdout, stderr = self.client.exec_command('ls {}'.format(self.current_path))
 
-        # Print response
         completion = []
         for line in stdout.readlines():
             completion.append(line.rstrip('\n'))
         return completion
+
+    def get_local_completion(self, path):
+        # Normalize paths
+        if path.startswith('.'):
+            path = os.path.join(os.getcwd(), path)
+        elif path.startswith('~'):
+            path = os.path.expanduser(path)
+        absolute_path = os.path.realpath(path)
+        path = os.path.dirname(absolute_path)
+        # Get list of files in dir
+        completion = os.listdir(path)
+        return completion, absolute_path
 
     def interpret(self, command):
         # Parsing input, getting actual command name and arguments
@@ -62,31 +75,70 @@ class Interpreter():
                 # Print response
                 self.terminal.add_lines(errors)
 
-        elif program == 'get':
+        elif program == 'push':
             rsync_args = ['rsync']
-            # rsync_args.append("-e 'ssh -p {}'".format(self.rsync[1]))
-            if args['recursive']:
-                rsync_args.append('--recursive')
+            rsync_args.append('--recursive')
             rsync_args.append('--partial')
             rsync_args.append('--perms')
             rsync_args.append('--times')
+            rsync_args.append('--links')
             rsync_args.append('--info=progress2')
 
-            compiled_paths = map(lambda path: '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, path)), args['path'])
-            rsync_args += list(compiled_paths)
+            rsync_args += args['files']
 
-            rsync_args.append('./')
+            target_path = '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, args['target']))
+            rsync_args.append(target_path)
 
             rsync_process = subprocess.Popen(rsync_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # Add a line in the terminal self.lines. We need this for update_last_lines to work
             self.terminal.add_line('')
             # Continously pass output to terminal, abort rsync process if ctrl-c occurs
             try:
-                while rsync_process.poll() is None:
+                no_error = True
+                while rsync_process.poll() is None and no_error:
                     line = rsync_process.stdout.readline()
                     line = line.rstrip()
+                    line = line.decode('utf-8')
+
                     if line != '':
                         self.terminal.update_last_lines([line])
+                    no_error = rsync_error_check(line)
+                stdout, stderr = rsync_process.communicate()
+            except KeyboardInterrupt:
+                self.terminal.add_line('Terminating rsync process, please wait')
+                rsync_process.terminate()
+                rsync_process.communicate()
+                self.terminal.update_last_lines(['Rsync process terminated'])
+
+        elif program == 'get':
+            rsync_args = ['rsync']
+            # rsync_args.append("-e 'ssh -p {}'".format(self.rsync[1]))
+            rsync_args.append('--recursive')
+            rsync_args.append('--partial')
+            rsync_args.append('--perms')
+            rsync_args.append('--times')
+            rsync_args.append('--links')
+            rsync_args.append('--info=progress2')
+
+            compiled_paths = map(lambda path: '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, path)), args['path'])
+            rsync_args += list(compiled_paths)
+
+            rsync_args.append(os.path.expanduser(args['target']))
+
+            rsync_process = subprocess.Popen(rsync_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # Add a line in the terminal self.lines. We need this for update_last_lines to work
+            self.terminal.add_line('')
+            # Continously pass output to terminal, abort rsync process if ctrl-c occurs
+            try:
+                no_error = True
+                while rsync_process.poll() is None and no_error:
+                    line = rsync_process.stdout.readline()
+                    line = line.rstrip()
+                    line = line.decode('utf-8')
+
+                    if line != '':
+                        self.terminal.update_last_lines([line])
+                    no_error = rsync_error_check(line)
                 stdout, stderr = rsync_process.communicate()
             except KeyboardInterrupt:
                 self.terminal.add_line('Terminating rsync process, please wait')

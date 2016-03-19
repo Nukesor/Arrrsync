@@ -1,3 +1,4 @@
+import os
 import math
 import curses
 
@@ -31,6 +32,7 @@ class Terminal():
         self.completionBuffer = None
         self.completionActive = False
         self.toBeCompleted = ''
+        self.completionPath = ''
 
         self.buffer = ''
         self.prompt = '>>: '
@@ -185,10 +187,17 @@ class Terminal():
         program, args = parser(self.buffer)
         if 'path' in args:
             if not self.completionActive:
-                self.completionList = self.interpreter.get_completion()
                 self.completionIndex = 0
                 self.completionBuffer = self.buffer
-                self.toBeCompleted = unescape(args['path'])[-1]
+                if 'target' in args and args['target'] != '.':
+                    self.completionList, self.completionPath = self.interpreter.get_local_completion(args['target'])
+                    if os.path.isdir(self.completionPath):
+                        self.toBeCompleted = ''
+                    else:
+                        self.toBeCompleted = os.path.basename(self.completionPath)
+                else:
+                    self.completionList = self.interpreter.get_completion()
+                    self.toBeCompleted = unescape(args['path'])[-1]
 
             self.completionList = list(filter(lambda string: string.startswith(self.toBeCompleted), self.completionList))
 
@@ -199,9 +208,11 @@ class Terminal():
 
             if len(self.completionList) > 0:
                 program, args = parser(self.completionBuffer)
-                if 'path' in args:
+                if 'target' in args and args['target'] != '.':
+                    args['target'] = escape(self.completionPath + self.completionList[self.completionIndex])
+                else:
                     args['path'][-1] = escape(self.completionList[self.completionIndex])
-                    self.buffer = assemble(program, args)
+                self.buffer = assemble(program, args)
 
         self.completionActive = True
 

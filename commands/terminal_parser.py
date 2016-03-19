@@ -7,9 +7,13 @@ cd_parser.add_argument('path', nargs='*', default=['.'], type=str, help='A direc
 
 # get Parser
 get_parser = ThrowingParser(description='Parser for get', add_help=False)
-get_parser.add_argument('-r', '--recursive', action='store_true', help='Recursive get')
 get_parser.add_argument('path', nargs='*', default=['.'], type=str, help='The files you want to get.')
+get_parser.add_argument('-t', '--target', default='.', type=str, help='The file/directory your files will be downloaded to.')
 
+# push Parser
+push_parser = ThrowingParser(description='Parser for push', add_help=False)
+push_parser.add_argument('files', nargs='*', type=str, help='The files you want to push.')
+push_parser.add_argument('-t', '--target', default='.', type=str, help='The file/directory you want to push to.')
 
 # ls Parser
 ls_parser = ThrowingParser(description='Parser for ls', add_help=False)
