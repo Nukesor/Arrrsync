@@ -18,26 +18,6 @@ class Interpreter():
         stdin, stdout, stderr = client.exec_command('cd .')
         self.current_path = escape(stdout.readline().rstrip('\n'))
 
-    def get_completion(self):
-        stdin, stdout, stderr = self.client.exec_command('ls {}'.format(self.current_path))
-
-        completion = []
-        for line in stdout.readlines():
-            completion.append(line.rstrip('\n'))
-        return completion
-
-    def get_local_completion(self, path):
-        # Normalize paths
-        if path.startswith('.'):
-            path = os.path.join(os.getcwd(), path)
-        elif path.startswith('~'):
-            path = os.path.expanduser(path)
-        absolute_path = os.path.realpath(path)
-        path = os.path.dirname(absolute_path)
-        # Get list of files in dir
-        completion = os.listdir(path)
-        return completion, absolute_path
-
     def interpret(self, command):
         # Parsing input, getting actual command name and arguments
         try:

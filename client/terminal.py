@@ -1,12 +1,8 @@
-import os
 import math
 import curses
 
 from client.interpreter import Interpreter
-
-from commands.bash_formatter import escape, unescape
-from commands.parser import parser
-from commands.assemble import assemble
+from client.completer import Completer
 
 
 class Terminal():
@@ -27,19 +23,14 @@ class Terminal():
         self.history = []
         self.historyIndex = 0
 
-        self.completionList = []
-        self.completionIndex = 0
-        self.completionBuffer = None
-        self.completionActive = False
-        self.toBeCompleted = ''
-        self.completionPath = ''
-
         self.buffer = ''
         self.prompt = '>>: '
+        self.completionActive = False
 
         self.client = client
         self.rsync = rsync
         self.interpreter = Interpreter(client, rsync, self)
+        self.completer = Completer(client, self)
         self.draw()
 
     def draw(self):
@@ -117,9 +108,14 @@ class Terminal():
         # Newline returns command
         elif key == '\n':
             self.completionActive = False
-            # Call interpreter on current buffer
-            if not self.interpreter.interpret(self.buffer):
-                return False
+            try:
+                # Call interpreter on current buffer
+                if not self.interpreter.interpret(self.buffer):
+                    return False
+            except KeyboardInterrupt:
+                # The current command is being interrupted with ctrl+c.
+                # Proceed like a normal ^C
+                pass
             # Add command to draw buffer
             self.add_line(self.prompt + self.buffer)
             # Append command to history and reset historyIndex
@@ -136,7 +132,14 @@ class Terminal():
 
         # Tab for completion
         elif key == '\t':
-            self.complete()
+            try:
+                if not self.completionActive:
+                    self.buffer = self.completer.complete(self.buffer)
+                else:
+                    self.buffer = self.completer.next()
+                self.completionActive = True
+            except KeyboardInterrupt:
+                pass
 
         # Scroll history down
         elif key == 'KEY_PPAGE':
@@ -180,41 +183,7 @@ class Terminal():
         curses.endwin()
 
     def get_dimensions(self):
-        self.colums = curses.COLS
-        self.rows = curses.LINES
-
-    def complete(self):
-        program, args = parser(self.buffer)
-        if 'path' in args:
-            if not self.completionActive:
-                self.completionIndex = 0
-                self.completionBuffer = self.buffer
-                if 'target' in args and args['target'] != '.':
-                    self.completionList, self.completionPath = self.interpreter.get_local_completion(args['target'])
-                    if os.path.isdir(self.completionPath):
-                        self.toBeCompleted = ''
-                    else:
-                        self.toBeCompleted = os.path.basename(self.completionPath)
-                else:
-                    self.completionList = self.interpreter.get_completion()
-                    self.toBeCompleted = unescape(args['path'])[-1]
-
-            self.completionList = list(filter(lambda string: string.startswith(self.toBeCompleted), self.completionList))
-
-            if self.completionActive:
-                self.completionIndex += 1
-                if self.completionIndex >= len(self.completionList):
-                    self.completionIndex = 0
-
-            if len(self.completionList) > 0:
-                program, args = parser(self.completionBuffer)
-                if 'target' in args and args['target'] != '.':
-                    args['target'] = escape(self.completionPath + self.completionList[self.completionIndex])
-                else:
-                    args['path'][-1] = escape(self.completionList[self.completionIndex])
-                self.buffer = assemble(program, args)
-
-        self.completionActive = True
+        self.rows, self.columns = self.screen.getmaxyx()
 
     def update_last_lines(self, lines):
         for index, line in enumerate(lines):
