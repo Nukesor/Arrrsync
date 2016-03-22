@@ -19,46 +19,47 @@ class Completer():
         self.remote_directory_root = escape(stdout.readline().rstrip('\n'))
 
     def check_if_dir(self, path):
+        """ Checks if the remote path is a directory """
         stdin, stdout, stderr = self.client.exec_command('isdir {}'.format(path))
         response = escape(stdout.readline().rstrip('\n'))
         if response == 'True':
             return True
         return False
 
-    def get_remote_completion_list(self, relative_path):
-        """ Get the completion for a relative path on the remote machine """
+    def remote_completion_list(self, relative_path):
+        """ Get the matching completion for a relative path on the remote machine """
 
         # Normalize path
         if relative_path.startswith('~') or relative_path.startswith('/'):
             path = os.path.expanduser(relative_path)
             os.path.join(self.remote_directory_root, relative_path)
-
-        elif relative_path.startswith('.'):
-            path = os.path.join(self.terminal.interpreter.current_path, relative_path)
         else:
             path = relative_path
         path = os.path.normpath(path)
 
-        # The path is a file, but we need a directory for completion
         if not self.check_if_dir(path):
             path = os.path.dirname(path)
+            dirname = os.path.dirname(relative_path)
+            # If the User uses '/' on filenames, we need to get the real directory
+            # This is needed to handle wrong input
+            while not self.check_if_dir(dirname) and dirname != './' and dirname != '/':
+                dirname = os.path.dirname(dirname)
+            basename = os.path.basename(relative_path)
         else:
-            path = path + '/'
+            dirname = relative_path
+            basename = ''
 
         stdin, stdout, stderr = self.client.exec_command('ls {}'.format(escape(path)))
 
-        # format for later use
         completion = []
         for line in stdout.readlines():
-            if path.endswith('/'):
-                full_path = path + line.rstrip('\n')
-            else:
-                full_path = line.rstrip('\n')
-            completion.append(full_path)
-        return completion
+            if line.startswith(basename):
+                completion.append(os.path.join(dirname, line.rstrip()))
 
-    def get_local_completion_list(self, relative_path):
-        """ Get the completion for a relative path on the local machine """
+        self.completion_list = completion
+
+    def local_completion_list(self, relative_path):
+        """ Get the matching completion for a relative path on the local machine """
 
         # Normalize path
         if relative_path.startswith('~'):
@@ -70,38 +71,55 @@ class Completer():
         path = os.path.normpath(path)
         path = os.path.realpath(path)
 
-        # Get directory name, if path is not a directory
         if not os.path.isdir(path):
+            dirname = os.path.dirname(relative_path)
+            # If the User uses '/' on files, we need to get the real directory
+            # This is needed to handle wrong input
+            while not os.path.isdir(dirname) and dirname != '':
+                dirname = os.path.dirname(dirname)
+            basename = os.path.basename(relative_path)
+        else:
+            dirname = relative_path
+            basename = ''
+
+        # Check for wrong dirname
+        if dirname == '':
+            dirname = './'
+        # Check for bad userinput and wrong pathnames
+        while not os.path.isdir(path):
             path = os.path.dirname(path)
 
         # Get list of files in dir
         itemlist = os.listdir(path)
         completion = []
         for item in itemlist:
-            completion.append(relative_path + item)
-        return completion
+            if item.startswith(basename):
+                completion.append(os.path.join(dirname, item.rstrip()))
+
+        self.completion_list = completion
 
     def complete(self, buffer):
         """ Actual function called by the terminal. Creates a list of possible completions and returns the first element """
+
+        # Save buffer for later completions
+        self.completion_buffer = buffer
+
         program, args = parser(buffer)
         if 'path' in args:
             self.completion_index = 0
-            # Save buffer for later completions
-            self.completion_buffer = buffer
 
             # Local completion
             if 'target' in args and args['target'] != '.':
-                to_be_completed = args['target']
-                self.completion_list = self.get_local_completion_list(to_be_completed)
+                self.local_completion_list(args['target'])
+
             # Remote completion
             else:
-                to_be_completed = unescape(args['path'])[-1]
-                self.completion_list = self.get_remote_completion_list(to_be_completed)
+                self.remote_completion_list(unescape(args['path'])[-1])
 
-            # Filtering completion options to match given string
-            self.completion_list = list(filter(lambda string: string.startswith(to_be_completed), self.completion_list))
-
-        return self.next()
+            return self.next()
+        else:
+            self.completion_list = []
+            return self.completion_buffer
 
     def next(self):
         """ Returns the next completion suggestion """

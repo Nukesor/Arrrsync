@@ -19,6 +19,7 @@ class Interpreter():
         self.current_path = escape(stdout.readline().rstrip('\n'))
 
     def interpret(self, command):
+        command = command.lstrip()
         # Parsing input, getting actual command name and arguments
         try:
             program, args = parser(command)
