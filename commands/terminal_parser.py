@@ -11,7 +11,7 @@ get_parser.add_argument('-t', '--target', default='.', type=str, help='The file/
 
 # push Parser
 push_parser = ThrowingParser(description='Parser for push', add_help=False)
-push_parser.add_argument('files', nargs='*', type=str, help='The files you want to push.')
+push_parser.add_argument('path', nargs='*', type=str, help='The files you want to push.')
 push_parser.add_argument('-t', '--target', default='.', type=str, help='The file/directory you want to push to.')
 
 # ls Parser

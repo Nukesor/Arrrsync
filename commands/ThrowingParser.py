@@ -1,10 +1,10 @@
 import argparse
 
 
-class ArgumentParserError(Exception):
+class ArgumentParseException(Exception):
     pass
 
 
 class ThrowingParser(argparse.ArgumentParser):
     def error(self, message):
-        raise ArgumentParserError(message, self.format_help())
+        raise ArgumentParseException(message, self.format_help())

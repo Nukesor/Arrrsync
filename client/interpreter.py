@@ -6,7 +6,7 @@ from client.helper import rsync_error_check
 from commands.bash_formatter import escape
 from commands.parser import parser, format_parse_error
 from commands.assemble import cd_assemble, ls_assemble
-from commands.ThrowingParser import ArgumentParserError
+from commands.ThrowingParser import ArgumentParseException
 
 
 class Interpreter():
@@ -23,7 +23,7 @@ class Interpreter():
         # Parsing input, getting actual command name and arguments
         try:
             program, args = parser(command)
-        except ArgumentParserError as error:
+        except ArgumentParseException as error:
             self.terminal.add_lines(format_parse_error(error, command))
             return True
 
@@ -65,7 +65,7 @@ class Interpreter():
             rsync_args.append('--links')
             rsync_args.append('--info=progress2')
 
-            rsync_args += args['files']
+            rsync_args += args['path']
 
             target_path = '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, args['target']))
             rsync_args.append(target_path)

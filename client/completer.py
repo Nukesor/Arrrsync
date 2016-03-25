@@ -3,6 +3,7 @@ import os
 from commands.parser import parser
 from commands.bash_formatter import escape, unescape
 from commands.assemble import assemble
+from commands.ThrowingParser import ArgumentParseException
 
 
 class Completer():
@@ -67,7 +68,7 @@ class Completer():
         elif relative_path.startswith('.') or relative_path == '':
             path = os.path.join(os.getcwd(), relative_path)
         else:
-            path = path
+            path = relative_path
         path = os.path.normpath(path)
         path = os.path.realpath(path)
 
@@ -104,17 +105,32 @@ class Completer():
         # Save buffer for later completions
         self.completion_buffer = buffer
 
-        program, args = parser(buffer)
+        # In case the parser fails, we don't want any error messages or crashes
+        # The error message will be displayed, if he presses enter
+        try:
+            program, args = parser(buffer)
+        except ArgumentParseException:
+            return buffer
+
         if 'path' in args:
             self.completion_index = 0
 
-            # Local completion
-            if 'target' in args and args['target'] != '.':
-                self.local_completion_list(args['target'])
+            if program == 'push':
+                # Local completion
+                if 'target' in args and args['target'] != '.':
+                    self.remote_completion_list(args['target'])
 
-            # Remote completion
+                # Remote completion
+                else:
+                    self.local_completion_list(unescape(args['path'])[-1])
             else:
-                self.remote_completion_list(unescape(args['path'])[-1])
+                # Local completion
+                if 'target' in args and args['target'] != '.':
+                    self.local_completion_list(args['target'])
+
+                # Remote completion
+                else:
+                    self.remote_completion_list(unescape(args['path'])[-1])
 
             return self.next()
         else:
