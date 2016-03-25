@@ -17,22 +17,27 @@ It should look like this afterwards:
 Let's take a closer look at the command: `/usr/bin/arrrsync-server -r -w /srv/files/`
 
 `arrrsync-server` This is the program that interprets all incoming commands and only executes those, that are allowed.  
-`/srv/files/` specifies the directory the user is allowed to see. He will be able to explore everything beneath it, but he can't escape it.  
+`/srv/files/` specifies the directory the user is allowed to see. He will only be able to explore anything beneath it, but he can't escape it.  
 `-rw` A normal read/write flag. By default there is only directory exploration allowed.  
 
 ## The client
 
-The `arrrsync` client emulates an shell, but it's actually nothing else than an convenient way of exploring the remote directory with autocompletion and history.  
-The client supports `ls`, `cd`, `get` and `push (WIP)`. `get` and `push` are aliases for rsync with some specific flags for file transfer.
+The `arrrsync` client emulates an shell, but it's actually nothing else than a convenient way of exploring the remote directory with autocompletion and history.  
+Currently supported commands are `ls`, `cd`, `get` and `push`. `get` and `push` are aliases for rsync with some specific flags for file transfer.
 
 The client uses paramiko for establishing a ssh session and tries to use as much configuration from your `~/.ssh/config` as possible.
-The files downloaded with `get` will be stored in the directory you called `arrrsync`.
+The destination for downloaded or uploaded files can be specified with `-t`. If the flag isn't given your current working directory and the remote file root will be used.
 
 ## Progress:
 
-`get` already works. But it only does with an ssh-agent and a key for the target server. I'm still looking for a convenient way to use the open paramiko ssh channel in combination with rsync.  
-The same is for `push`. `push` is still under development and propably not working.  
+`get` and `push` already works. But it only does with a ssh-agent and a key for the target server. I'm still looking for a convenient way to use the open paramiko ssh channel in combination with rsync.
 
 ##Completion:
-Completion as a really annoying topic! I implemented path completion basics, but there are so many ways for users to write faulty paths, I stopped trying to handle all of them.  
-Help or advice is really appreciated!!
+Completion as a really annoying topic! I implemented basic path completion, but there are so many ways for users to write faulty paths, I stopped trying to handle all of them.  
+
+
+Help or advice is really appreciated!!  
+Feel free to contribute!!
+
+
+Copyright &copy; 2016 Arne Beer ([@Nukesor](https://github.com/Nukesor))
