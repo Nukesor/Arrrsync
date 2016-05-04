@@ -30,7 +30,7 @@ The destination for downloaded or uploaded files can be specified with `-t`. If 
 
 ## Progress:
 
-`get` and `push` already works. But it only does with a ssh-agent and a key for the target server. I'm still looking for a convenient way to use the open paramiko ssh channel in combination with rsync.
+The commands `get` and `push` already work. But it only does with a ssh-agent and a key for the target server. I'm still looking for a convenient way to use the open paramiko ssh channel in combination with rsync.
 
 ##Completion:
 Completion as a really annoying topic! I implemented basic path completion, but there are so many ways for users to write faulty paths, I stopped trying to handle all of them.  
