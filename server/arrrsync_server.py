@@ -104,7 +104,6 @@ def main():
                 path = get_target_dir(arrrsync_args['path'], unescape(path))
             rsync_args.append(path)
 
-
         rsync_process = subprocess.Popen(rsync_args, shell=False)
         rsync_process.communicate()
 

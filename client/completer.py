@@ -100,7 +100,10 @@ class Completer():
         self.completion_list = completion
 
     def complete(self, buffer):
-        """ Actual function called by the terminal. Creates a list of possible completions and returns the first element """
+        """ Actual function called by the terminal.
+
+        Creates a list of possible completions and returns the first element
+        """
 
         # Save buffer for later completions
         self.completion_buffer = buffer
@@ -142,7 +145,8 @@ class Completer():
         if len(self.completion_list) > 0:
             program, args = parser(self.completion_buffer)
             if 'target' in args and args['target'] != '.':
-                args['target'] = escape(self.completionPath + self.completion_list[self.completion_index])
+                args['target'] = escape(self.completionPath +
+                                        self.completion_list[self.completion_index])
             else:
                 args['path'][-1] = escape(self.completion_list[self.completion_index])
             buffer = assemble(program, args)

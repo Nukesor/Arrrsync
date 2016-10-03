@@ -66,8 +66,9 @@ def connectSSH(args):
         except PasswordRequiredException:
             if first_try:
                 print("No ssh-agent running or can't find a key in your ssh-agent.")
-                print('Using keyfile: ' + config['identityfile'][0])
-                print('If you want to connect using password authentication, enter your password here as well.')
+                print('Using keyfile: {}'.format(config['identityfile'][0]))
+                print('If you want to connect using password authentication,'
+                      ' enter your password here as well.')
                 first_try = False
             try:
                 config['password'] = getpass.getpass('Password: ')
@@ -76,7 +77,8 @@ def connectSSH(args):
                 sys.exit(1)
 
         except BadAuthenticationType as error:
-            print("Wrong password or wrong authentication type. Allowed types are : {}".format(str(error.allowed_types)))
+            print("Wrong password or wrong authentication type."
+                  " Allowed types are : {}".format(str(error.allowed_types)))
             del config['password']
 
     rsync_hostname = config['user']

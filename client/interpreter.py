@@ -67,10 +67,17 @@ class Interpreter():
 
             rsync_args += args['path']
 
-            target_path = '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, args['target']))
+            target_path = '{}:{}'.format(
+                self.rsync[0],
+                os.path.join(self.current_path, args['target'])
+            )
             rsync_args.append(target_path)
 
-            rsync_process = subprocess.Popen(rsync_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            rsync_process = subprocess.Popen(
+                rsync_args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
             # Add a line in the terminal self.lines. We need this for update_last_lines to work
             self.terminal.add_line('')
             # Continously pass output to terminal, abort rsync process if ctrl-c occurs
@@ -101,12 +108,17 @@ class Interpreter():
             rsync_args.append('--links')
             rsync_args.append('--info=progress2')
 
-            compiled_paths = map(lambda path: '{}:{}'.format(self.rsync[0], os.path.join(self.current_path, path)), args['path'])
+            compiled_paths = map(lambda path: '{}:{}'.format(
+                self.rsync[0], os.path.join(self.current_path, path)), args['path'])
             rsync_args += list(compiled_paths)
 
             rsync_args.append(os.path.expanduser(args['target']))
 
-            rsync_process = subprocess.Popen(rsync_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            rsync_process = subprocess.Popen(
+                rsync_args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
             # Add a line in the terminal self.lines. We need this for update_last_lines to work
             self.terminal.add_line('')
             # Continously pass output to terminal, abort rsync process if ctrl-c occurs
