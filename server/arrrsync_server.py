@@ -86,7 +86,7 @@ def main():
         # Sender flag is set. This means the server will send some data
         if args['sender']:
             if arrrsync_args['r'] is not True:
-                print("Reading is not for your key allowed. Aborting")
+                print("Reading is not allowed for your key. Aborting")
                 sys.exit(0)
 
             rsync_args.append('--sender')
@@ -97,7 +97,7 @@ def main():
         # Sender flag isn't set. This means the server will receive some data
         else:
             if arrrsync_args['w'] is not True:
-                print("Writing is not for your key allowed. Aborting")
+                print("Writing is not allowed for your key. Aborting")
                 sys.exit(0)
             path = args['path'][-1]
             if not path == '.':
